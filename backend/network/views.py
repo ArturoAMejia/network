@@ -7,12 +7,12 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 
 from rest_framework import permissions, viewsets
-from .serializers import PostSerializer
+from .serializers import PostSerializer, FollowSerializer, UserSerializer
 from rest_framework.decorators import api_view
 
 
 
-from .models import Post, User
+from .models import Follow, Post, User
 
 
 def index(request):
@@ -97,4 +97,30 @@ class PostView(APIView):
         return JsonResponse({"test":"test"}, safe=False)
 
 
+class FollowView(APIView):
+    def post(self, request):
+        serializer = FollowSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, safe=False)
+        return JsonResponse({"test":"test"}, safe=False)
+    
 
+class UserView(APIView):
+    def get(self, request):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+
+class UserFollowView(APIView):
+    def followers_by_user(self, user):
+        return Follow.objects.filter(followed_user=user).count()
+    def following_by_user(self, user):
+        return Follow.objects.filter(user=user).count()
+    
+    def get(self, request, pk):
+        followers = self.followers_by_user(pk)
+        following = self.following_by_user(pk)
+        print(followers)
+        return JsonResponse({ "follwers" : followers, "following": following }, safe=False)
