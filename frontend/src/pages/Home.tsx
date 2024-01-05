@@ -1,9 +1,25 @@
+import { CreatePostForm } from "@/components/forms/CreatePostForm";
+import { PostCard } from "@/components/ui/PostCard";
+import { useGetPosts } from "@/hooks";
+import { IPost } from "@/interfaces/post";
+import { Loader } from "lucide-react";
+
 export const Home = () => {
+  const { data, isLoading } = useGetPosts();
+
   return (
     <div>
-      <section>1</section>
-      <section>2</section>
-      <section>3</section>
+      <CreatePostForm />
+
+      {isLoading === true ? (
+        <Loader />
+      ) : (
+        <div className="flex flex-col gap-1">
+          {data?.map((post: IPost) => (
+            <PostCard key={post.id} post={post} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
