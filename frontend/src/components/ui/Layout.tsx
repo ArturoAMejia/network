@@ -1,15 +1,13 @@
-import React from "react";
 import Navbar from "./Navbar";
+import { Outlet } from "react-router-dom";
 
-type Props = {
-  children: React.ReactNode;
-};
-
-export const Layout: React.FC<Props> = ({ children }) => {
+export const Layout = () => {
   return (
-    <main className="bg-black text-white">
+    <div className="bg-black text-white flex flex-col gap-16 md:grid md:grid-cols-3 p-8 h-screen">
       <Navbar />
-      {children}
-    </main>
+      <main>
+        <Outlet />
+      </main>
+    </div>
   );
 };
