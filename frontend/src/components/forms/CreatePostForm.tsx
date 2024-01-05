@@ -33,7 +33,7 @@ export const CreatePostForm = () => {
   const { mutate, isError, error } = useCreatePost();
 
   const onCreatePost = async ({ content }: FormData) => {
-    mutate({ content, user: 1 });
+    mutate({ content, user: 2 });
     if (isError) {
       console.log(error);
     }

@@ -1,9 +1,16 @@
-import { IUser } from "./user";
-
 export interface IPost {
-  id?:         number;
-  content:    string;
+  id?: number;
+  user: User | number;
+  likes?: number;
+  content: string;
   created_at?: Date;
   updated_at?: Date;
-  user:       number | IUser;
+}
+
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  followers: number;
+  following: number;
 }
