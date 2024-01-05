@@ -1,3 +1,4 @@
+import { Toaster } from "react-hot-toast";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 function Root() {
@@ -8,6 +9,7 @@ function Root() {
   }
   return (
     <main>
+      <Toaster position="top-right" reverseOrder={false} />
       <Outlet />
     </main>
   );
