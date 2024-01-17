@@ -1,7 +1,20 @@
 import { LoginForm } from "@/components/forms/LoginForm";
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 
 export const Login = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const jwt = Cookies.get("user");
+
+    if (jwt) {
+
+        return navigate("/")
+    }  
+
+  }, [navigate])
   return (
     <>
       <section className="bg-black text-white">

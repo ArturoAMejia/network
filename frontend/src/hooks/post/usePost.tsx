@@ -1,9 +1,15 @@
 import api from "@/api/api";
-import { IPost } from "@/interfaces/post";
+import { ILike, IPost } from "@/interfaces/post";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import Cookies from "js-cookie";
 
 const getPosts = async () => {
-  const { data } = await api.get("/post");
+  const token = Cookies.get("user_id");
+  const { data } = await api.get("/post", {
+    headers: {
+      Authorization: token,
+    },
+  });
   return data;
 };
 
@@ -12,10 +18,28 @@ const createPost = async (post: IPost) => {
   return data;
 };
 
+const likePost = async (post: ILike) => {
+  const { data } = await api.post("/like", post);
+  return data;
+};
+
 export const useGetPosts = () => {
   return useQuery(["posts"], () => getPosts());
-
 };
 export const useCreatePost = () => {
-  return useMutation({ mutationFn: (post: IPost) => createPost(post) });
+  const { refetch } = useGetPosts();
+
+  return useMutation({
+    mutationFn: (post: IPost) => createPost(post),
+    onSuccess: () => refetch(),
+  });
+};
+
+export const useLikePost = () => {
+  const { refetch } = useGetPosts();
+
+  return useMutation({
+    mutationFn: (post: ILike) => likePost(post),
+    onSuccess: () => refetch(),
+  });
 };

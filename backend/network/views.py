@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
-from .serializers import PostSerializer, FollowSerializer, UserSerializer, LikeSerializer
+from .serializers import GetPostSerializer, PostSerializer, FollowSerializer, UserSerializer, LikeSerializer
 from .models import Follow, Post, User, Like
 import json
 
@@ -30,7 +30,8 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
-            return JsonResponse({"message": "Login successful"}, safe=False, status=200)
+            serializer = UserSerializer(user)
+            return JsonResponse(serializer.data, safe=False, status=200)
         else:
             return JsonResponse({"error": "Invalid username and/or password."}, safe=False, status=400)
 
@@ -69,19 +70,20 @@ def register(request):
 
 class PostView(APIView):
     def get(self, request):
-        # Change user value, user_id come from cookies
-        follow = Follow.objects.select_related("user").all().filter(user=2).values_list("followed_user", flat=True)
-        posts = Post.objects.all().filter(user__in=follow)
-        users = User.objects.all().filter(id__in=follow).values()
-        # posts = Post.objects.all().filter(user__in=follow).values().order_by("-created_at")
-        serializer = PostSerializer(posts, many=True)
+        user_id = request.headers.get("Authorization")
+
+        follow = Follow.objects.select_related("user").all().filter(user=user_id).values_list("followed_user", flat=True)
+        follow = list(follow)
+        follow.append(user_id)
+        posts = Post.objects.all().filter(user__in=follow).order_by("-created_at")
+        serializer = GetPostSerializer(posts, many=True)
         return JsonResponse(serializer.data, safe=False)
     
     def post(self, request):
         serializer = PostSerializer(data=request.data)
 
         if not serializer.is_valid():
-            return JsonResponse({"error":"Invalid data"}, safe=False)
+            return JsonResponse({"error":"Invalid data"}, safe=False, status=400)
         
         serializer.save()
         return JsonResponse(serializer.data, safe=False)
@@ -125,7 +127,8 @@ class UserFollowView(APIView):
 
 
 class LikePostView(APIView):
-    def get(self, request, user_id):
+    def get(self, request):
+        user_id = request.headers.get("Authorization")
 
         likes = Like.objects.filter(user=user_id).count()
         return JsonResponse({ "likes": likes }, safe=False)
@@ -135,12 +138,13 @@ class LikePostView(APIView):
         like = Like.objects.filter(user=request.data["user"], post=request.data["post"])
 
         if like.exists():
-            return JsonResponse({"error": "Already liked"}, safe=False)
+            like = Like.objects.filter(user=request.data["user"], post=request.data["post"]).delete()
+            return JsonResponse({"message": "Unlike done"}, safe=False)
         
         serializer = LikeSerializer(data=request.data)
 
         if not serializer.is_valid():
-            return JsonResponse({"error": "Invalid data"}, safe=False)
+            return JsonResponse({"error": "Invalid data"}, safe=False, status=400)
         
         serializer.save()
         return JsonResponse(serializer.data, safe=False)

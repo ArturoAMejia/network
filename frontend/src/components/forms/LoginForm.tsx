@@ -12,9 +12,11 @@ import {
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Link, useNavigate } from "react-router-dom";
-
-import { useLogin } from "@/hooks";
+// import Cookies from "js-cookie";
+// import { useLogin } from "@/hooks";
 import { toast } from "react-hot-toast";
+import { useContext } from "react";
+import { AuthContext } from "@/context";
 
 const loginSchema = z.object({
   email: z.string(),
@@ -37,18 +39,21 @@ export const LoginForm = () => {
 
   const navigate = useNavigate();
 
-  const { mutate, isError, error } = useLogin();
-  const onLoginUser = async ({ email, password }: FormData) => {
-    mutate({ username: email, password });
+  const { login } = useContext(AuthContext);
 
-    if (isError) {
-      console.log(error);
-    }
-    console.log('a');
+  // const { mutate, isError, error, data } = useLogin();
+  const onLoginUser = async ({ email, password }: FormData) => {
+    login({ username: email, password });
+
+    // Cookies.set("token", data.access);
+
+    // if (isError) {
+    //   console.log(error);
+    // }
+    console.log("a");
     navigate("/home");
     toast.success("Logged in successfully!");
-    console.log('b')
-
+    console.log("b");
   };
 
   return (

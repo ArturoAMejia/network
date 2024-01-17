@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 
 const login = async (user: IUser) => {
   const { data } = await api.post("/login", user);
+  
   return data;
 };
 

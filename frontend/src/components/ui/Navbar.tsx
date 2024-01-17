@@ -2,8 +2,12 @@ import { Disclosure } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { LogOut, Settings, Twitter, User } from "lucide-react";
 import { Link } from "react-router-dom";
+import Coookies from "js-cookie";
 
 export default function Navbar() {
+  const logout = () => {
+    Coookies.remove("user");
+  };
   return (
     <Disclosure as="nav" className="bg-black">
       {({ open }) => (
@@ -38,7 +42,8 @@ export default function Navbar() {
                       Following
                     </Link>
                     <Link
-                      to="/cart"
+                      to={"/auth/login"}
+                      onClick={logout}
                       className="text-white text-xl px-3 py-2 rounded-md font-bold"
                     >
                       <LogOut className="h-6 w-6 text-white" />

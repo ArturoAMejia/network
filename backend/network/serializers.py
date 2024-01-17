@@ -17,12 +17,26 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'email', 'followers', 'following')
 
 
-class PostSerializer(serializers.ModelSerializer):
-    user = UserSerializer(many=False)
-    likes = serializers.SerializerMethodField()
+class LikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = '__all__'
 
-    def get_likes(self, obj):
+
+class GetPostSerializer(serializers.ModelSerializer):
+    user = UserSerializer(many=False)
+    likes = LikeSerializer(many=True)
+    count = serializers.SerializerMethodField()
+
+
+    def get_count(self, obj):
         return Like.objects.filter(post=obj).count()
+    class Meta:
+        model = Post
+        fields = '__all__'
+
+
+class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = '__all__'
@@ -34,7 +48,3 @@ class FollowSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class LikeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Like
-        fields = '__all__'

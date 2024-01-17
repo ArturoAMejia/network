@@ -14,6 +14,7 @@ import { Button } from "../ui/button";
 import { useCreatePost } from "@/hooks";
 import toast from "react-hot-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Cookies from "js-cookie";
 
 const postSchema = z.object({
   content: z.string(),
@@ -32,8 +33,11 @@ export const CreatePostForm = () => {
 
   const { mutate, isError, error } = useCreatePost();
 
+  const u = Cookies.get("user");
+  const user = JSON.parse(u!)
+
   const onCreatePost = async ({ content }: FormData) => {
-    mutate({ content, user: 2 });
+    mutate({ content, user: user.id });
     if (isError) {
       console.log(error);
     }
