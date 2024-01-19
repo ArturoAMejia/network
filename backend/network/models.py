@@ -11,7 +11,8 @@ class Post(models.Model):
     content = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+    class Meta:
+        ordering = ('-created_at',)
 
 class Like(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="likes")

@@ -8,6 +8,8 @@ from rest_framework.views import APIView
 from .serializers import GetPostSerializer, PostSerializer, FollowSerializer, UserSerializer, LikeSerializer
 from .models import Follow, Post, User, Like
 import json
+from django.core.paginator import Paginator
+
 
 def index(request):
     return render(request, "network/index.html")
@@ -70,14 +72,11 @@ def register(request):
 
 class PostView(APIView):
     def get(self, request):
-        user_id = request.headers.get("Authorization")
-
-        follow = Follow.objects.select_related("user").all().filter(user=user_id).values_list("followed_user", flat=True)
-        follow = list(follow)
-        follow.append(user_id)
-        posts = Post.objects.all().filter(user__in=follow).order_by("-created_at")
+        posts = Post.objects.all().order_by("-created_at")
         serializer = GetPostSerializer(posts, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        paginator = Paginator(serializer.data, 10)
+        r = paginator.page(1).object_list
+        return JsonResponse({"posts": r}, safe=False)
     
     def post(self, request):
         serializer = PostSerializer(data=request.data)
@@ -100,17 +99,25 @@ class PostView(APIView):
 
 class FollowView(APIView):
     def post(self, request):
+        follow = Follow.objects.filter(user=request.data["user"], followed_user=request.data["followed_user"])
+
+        if follow.exists():
+            follow = Follow.objects.filter(user=request.data["user"], followed_user=request.data["followed_user"]).delete()
+            return JsonResponse({"message": "Unfollow done"}, safe=False)
+        
         serializer = FollowSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, safe=False)
-        return JsonResponse({"test":"test"}, safe=False)
+        if not serializer.is_valid():
+            return JsonResponse({"error":"Invalid data"}, safe=False, status=400)
+        
+        serializer.save()
+        return JsonResponse(serializer.data, safe=False)
     
 
 class UserView(APIView):
-    def get(self, request):
-        users = User.objects.all()
-        serializer = UserSerializer(users, many=True)
+    def get(self, request, username):
+
+        user = User.objects.get(username=username)
+        serializer = UserSerializer(user)
         return JsonResponse(serializer.data, safe=False)
 
 

@@ -10,6 +10,7 @@ import { IPost } from "@/interfaces/post";
 import Cookies from "js-cookie";
 import { Heart } from "lucide-react";
 import { FC } from "react";
+import { Link } from "react-router-dom";
 
 type Props = {
   post: IPost;
@@ -25,7 +26,9 @@ export const PostCard: FC<Props> = ({ post }) => {
   return (
     <Card className="bg-black text-white border-gray-800 rounded-none">
       <CardHeader>
-        <CardTitle>{post.user.username}</CardTitle>
+        <CardTitle>
+          <Link to={post.user.username}>{post.user.username}</Link>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <p className="break-words">{post.content}</p>

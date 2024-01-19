@@ -1,7 +1,8 @@
 import api from "@/api/api";
-import { ILike, IPost } from "@/interfaces/post";
+import { IFollowing, ILike, IPost } from "@/interfaces/post";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Cookies from "js-cookie";
+import { useGetUser } from "..";
 
 const getPosts = async () => {
   const token = Cookies.get("user_id");
@@ -40,6 +41,20 @@ export const useLikePost = () => {
 
   return useMutation({
     mutationFn: (post: ILike) => likePost(post),
+    onSuccess: () => refetch(),
+  });
+};
+
+const followUser = async (follow: IFollowing) => {
+  const { data } = await api.post("/follow", follow);
+  return data;
+};
+
+export const useFollowUser = (username: string) => {
+  const { refetch } = useGetUser(username);
+
+  return useMutation({
+    mutationFn: (follow: IFollowing) => followUser(follow),
     onSuccess: () => refetch(),
   });
 };

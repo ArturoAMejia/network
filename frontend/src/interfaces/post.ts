@@ -11,8 +11,9 @@ export interface User {
   id: number;
   username: string;
   email: string;
-  followers: number;
-  following: number;
+  count_followers: number;
+  count_following: number;
+  following: IFollowing[] | []
 }
 
 export interface ILike {
@@ -42,3 +43,10 @@ export interface Like {
   post:       number;
 }
 
+export interface IFollowing {
+  id?:            number;
+  created_at?:    Date;
+  updated_at?:    Date;
+  user:          number;
+  followed_user: number;
+}
