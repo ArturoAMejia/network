@@ -5,19 +5,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { AuthContext } from "@/context";
 import { useLikePost } from "@/hooks";
 import { IPost } from "@/interfaces/post";
 import Cookies from "js-cookie";
 import { Heart } from "lucide-react";
-import { FC } from "react";
+import { FC, useContext } from "react";
 import { Link } from "react-router-dom";
+import { EditPost } from "../site/EditPost";
 
 type Props = {
   post: IPost;
 };
 
 export const PostCard: FC<Props> = ({ post }) => {
-  const { mutate } = useLikePost();
+  const { page } = useContext(AuthContext);
+  const { mutate } = useLikePost(page);
   const user_id = Cookies.get("user_id");
 
   const onLikePost = async () => {
@@ -26,8 +29,9 @@ export const PostCard: FC<Props> = ({ post }) => {
   return (
     <Card className="bg-black text-white border-gray-800 rounded-none">
       <CardHeader>
-        <CardTitle>
+        <CardTitle className="flex justify-between">
           <Link to={post.user.username}>{post.user.username}</Link>
+          {post.user.id === Number(user_id) && <EditPost post={post} />}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -36,7 +40,7 @@ export const PostCard: FC<Props> = ({ post }) => {
 
       <CardFooter className="flex gap-4">
         <div className="flex gap-2">
-          {post.likes?.filter((like) => like.user === Number(user_id))?.length >
+          {post.likes!.filter((like) => like.user === Number(user_id))?.length >
           0 ? (
             <>
               <button onClick={onLikePost}>

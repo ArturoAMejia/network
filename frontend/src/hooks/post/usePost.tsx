@@ -1,16 +1,10 @@
 import api from "@/api/api";
 import { IFollowing, ILike, IPost } from "@/interfaces/post";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import Cookies from "js-cookie";
 import { useGetUser } from "..";
 
-const getPosts = async () => {
-  const token = Cookies.get("user_id");
-  const { data } = await api.get("/post", {
-    headers: {
-      Authorization: token,
-    },
-  });
+const getPosts = async (numberOfPage: number) => {
+  const { data } = await api.get(`/post?page=${numberOfPage}`);
   return data;
 };
 
@@ -19,16 +13,21 @@ const createPost = async (post: IPost) => {
   return data;
 };
 
+const updatePost = async (post: IPost) => {
+  const { data } = await api.put("/post", post);
+  return data;
+};
+
 const likePost = async (post: ILike) => {
   const { data } = await api.post("/like", post);
   return data;
 };
 
-export const useGetPosts = () => {
-  return useQuery(["posts"], () => getPosts());
+export const useGetPosts = (numberOfPage: number) => {
+  return useQuery(["posts"], () => getPosts(numberOfPage));
 };
-export const useCreatePost = () => {
-  const { refetch } = useGetPosts();
+export const useCreatePost = (page: number) => {
+  const { refetch } = useGetPosts(page);
 
   return useMutation({
     mutationFn: (post: IPost) => createPost(post),
@@ -36,8 +35,17 @@ export const useCreatePost = () => {
   });
 };
 
-export const useLikePost = () => {
-  const { refetch } = useGetPosts();
+export const useUpdatePost = (page: number) => {
+  const { refetch } = useGetPosts(page);
+
+  return useMutation({
+    mutationFn: (post: IPost) => updatePost(post),
+    onSuccess: () => refetch(),
+  });
+};
+
+export const useLikePost = (page: number) => {
+  const { refetch } = useGetPosts(page);
 
   return useMutation({
     mutationFn: (post: ILike) => likePost(post),

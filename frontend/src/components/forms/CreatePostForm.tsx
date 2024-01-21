@@ -15,6 +15,8 @@ import { useCreatePost } from "@/hooks";
 import toast from "react-hot-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Cookies from "js-cookie";
+import { useContext } from "react";
+import { AuthContext } from "@/context";
 
 const postSchema = z.object({
   content: z.string(),
@@ -23,6 +25,7 @@ const postSchema = z.object({
 type FormData = z.infer<typeof postSchema>;
 
 export const CreatePostForm = () => {
+  const { page } = useContext(AuthContext);
   const form = useForm<FormData>({
     resolver: zodResolver(postSchema),
     mode: "onChange",
@@ -31,10 +34,10 @@ export const CreatePostForm = () => {
     },
   });
 
-  const { mutate, isError, error } = useCreatePost();
+  const { mutate, isError, error } = useCreatePost(page);
 
   const u = Cookies.get("user");
-  const user = JSON.parse(u!)
+  const user = JSON.parse(u!);
 
   const onCreatePost = async ({ content }: FormData) => {
     mutate({ content, user: user.id });

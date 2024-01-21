@@ -17,17 +17,11 @@ def index(request):
 @csrf_exempt
 def login_view(request):
     if request.method == "POST":
-        print("---------")
         data = json.loads(request.body)
-        print(data)
-        print("---------")
-
         # Attempt to sign user in
-
         username = data["username"]
         password = data["password"]
         user = authenticate(request, username=username, password=password)
-        print(user)
 
         # Check if authentication successful
         if user is not None:
@@ -72,11 +66,12 @@ def register(request):
 
 class PostView(APIView):
     def get(self, request):
+        page = request.GET.get('page', 1)
         posts = Post.objects.all().order_by("-created_at")
         serializer = GetPostSerializer(posts, many=True)
         paginator = Paginator(serializer.data, 10)
-        r = paginator.page(1).object_list
-        return JsonResponse({"posts": r}, safe=False)
+        r = paginator.page(page).object_list
+        return JsonResponse({"posts": r, "numberOfPages" : paginator.num_pages}, safe=False)
     
     def post(self, request):
         serializer = PostSerializer(data=request.data)
@@ -88,13 +83,9 @@ class PostView(APIView):
         return JsonResponse(serializer.data, safe=False)
     
     def put(self, request):
-        serializer = PostSerializer(data=request.data)
-
-        if not serializer.is_valid():
-            return JsonResponse({"error":"Invalid data"}, safe=False)
-        
-        serializer.save()
-        return JsonResponse(serializer.data, safe=False)
+        post = Post.objects.filter(id=request.data["id"]).update(content=request.data["content"])
+        serializer = PostSerializer(post)
+        return JsonResponse(post, safe=False)
 
 
 class FollowView(APIView):

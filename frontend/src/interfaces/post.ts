@@ -28,7 +28,7 @@ export interface ILike {
 export interface IPost {
   id?:         number;
   user:       User;
-  likes:      Like[] | [];
+  likes?:      Like[] | [];
   count?:      number;
   content:    string;
   created_at?: Date;

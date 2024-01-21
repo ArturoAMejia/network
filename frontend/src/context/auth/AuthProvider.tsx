@@ -1,5 +1,5 @@
 import { IUser } from "@/interfaces/user";
-import { FC, PropsWithChildren, useEffect, useReducer } from "react";
+import { FC, PropsWithChildren, useEffect, useReducer, useState } from "react";
 import { AuthContext } from "./AuthContext";
 import { authReducer } from "./authReducer";
 import Cookies from "js-cookie";
@@ -20,10 +20,12 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const session = Cookies.get("user");
 
+  const [page, setPage] = useState<number>(1);
+
   useEffect(() => {
     if (session) {
       const user = JSON.parse(session);
-      console.log(user)
+      console.log(user);
       dispatch({ type: "Login", payload: user });
     }
   }, [session]);
@@ -45,7 +47,15 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ ...state, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        ...state,
+        login,
+        logout,
+        page,
+        setPage
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
